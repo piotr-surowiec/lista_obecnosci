@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rejestrator Czasu Pracy</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2922/2922510.png">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-left">
+            <h1>Rejestrator Czasu</h1>
+            <div id="connection-status" class="status-indicator online">Online</div>
+        </div>
+        <div class="header-right">
+            <div id="clock" class="clock">00:00</div>
+            <div id="date" class="date">Poniedziałek, 1 Stycznia</div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-container">
+        <!-- Loading State -->
+        <div id="loading-view" class="view active">
+            <div class="spinner"></div>
+            <p>Ładowanie listy pracowników...</p>
+        </div>
+
+        <!-- Employee Grid -->
+        <div id="employee-grid-view" class="view">
+            <!-- Alphabet Filter -->
+            <div id="alphabet-filter" class="alphabet-filter">
+                <!-- Letters will be injected here -->
+            </div>
+
+            <div class="grid-container" id="employee-grid">
+                <!-- Tiles will be injected here -->
+            </div>
+        </div>
+
+        <!-- Action Modal (Overlay) -->
+        <div id="action-modal" class="modal hidden">
+            <div class="modal-content">
+                <button id="close-modal" class="close-btn">&times;</button>
+                <h2 id="modal-employee-name">Jan Kowalski</h2>
+                <p id="modal-status-text">Wybierz akcję:</p>
+
+                <div class="action-buttons">
+                    <button id="btn-start" class="action-btn start-btn">
+                        <span class="icon">▶</span>
+                        START PRACY
+                    </button>
+                    <button id="btn-stop" class="action-btn stop-btn hidden">
+                        <span class="icon">⏹</span>
+                        KONIEC PRACY
+                    </button>
+                </div>
+
+                <div id="action-message" class="message hidden"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('SW registered', reg))
+                .catch(err => console.log('SW failed', err));
+        }
+    </script>
+</body>
+
+</html>
