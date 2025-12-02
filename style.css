@@ -198,6 +198,11 @@ body {
     background-color: #f0fdf4;
 }
 
+.employee-tile.finished {
+    border-color: #0284c7;
+    background-color: #e0f2fe;
+}
+
 .employee-initials {
     width: 60px;
     height: 60px;
@@ -226,6 +231,11 @@ body {
 .employee-status.active {
     color: var(--success-color);
     font-weight: bold;
+}
+
+.employee-status.finished {
+    color: #0284c7;
+    font-weight: 600;
 }
 
 /* Modal */

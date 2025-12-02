@@ -1,13 +1,13 @@
 // Configuration
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVBgJwTHQ6_gtiN3mc4IFRQWnuCQbGhW93FSGUXKn8fQL3bA4NXnh0_SMRKVI2qWsd/exec'; // User will replace this
-const USE_MOCK_DATA = false; // Set to false when connected to GAS
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVBgJwTHQ6_gtiN3mc4IFRQWnuCQbGhW93FSGUXKn8fQL3bA4NXnh0_SMRKVI2qWsd/exec';
+const USE_MOCK_DATA = false;
 
 // State
 let state = {
     employees: [],
     currentEmployee: null,
     isLoading: false,
-    activeFilter: null // null means show all
+    activeFilter: null
 };
 
 // DOM Elements
@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAlphabet();
     fetchEmployees();
     setupEventListeners();
+    scheduleNextMidnightReset();
 });
 
 // Clock & Date
@@ -42,12 +43,49 @@ function updateClock() {
     dom.date.textContent = now.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
+// Helper: Calculate Work Hours
+function calculateWorkHours(startTime, endTime) {
+    if (!startTime || !endTime) return '';
+
+    const [startHour, startMin] = startTime.split(':').map(Number);
+    const [endHour, endMin] = endTime.split(':').map(Number);
+
+    const startTotalMin = startHour * 60 + startMin;
+    const endTotalMin = endHour * 60 + endMin;
+    const diffMin = endTotalMin - startTotalMin;
+
+    const hours = Math.floor(diffMin / 60);
+    const minutes = diffMin % 60;
+
+    if (minutes === 0) {
+        return `${hours}h`;
+    }
+    return `${hours}h ${minutes}min`;
+}
+
+// Helper: Schedule Midnight Reset
+function scheduleNextMidnightReset() {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+
+    const msUntilMidnight = tomorrow.getTime() - now.getTime();
+
+    setTimeout(() => {
+        console.log('Midnight reset - refreshing employee data...');
+        fetchEmployees();
+        scheduleNextMidnightReset();
+    }, msUntilMidnight);
+
+    console.log(`Next midnight reset scheduled in ${Math.round(msUntilMidnight / 1000 / 60)} minutes`);
+}
+
 // Data Fetching
 async function fetchEmployees() {
     setLoading(true);
 
     if (USE_MOCK_DATA) {
-        // Mock Data Simulation
         setTimeout(() => {
             state.employees = [
                 { id: 1, name: "Jan Kowalski", source: "PRACA", status: "IDLE" },
@@ -71,7 +109,7 @@ async function fetchEmployees() {
         }
 
         state.employees = data.employees;
-        // Sort alphabetically by name (Surname Name format)
+
         state.employees.sort((a, b) => a.name.localeCompare(b.name, 'pl'));
         renderGrid();
     } catch (error) {
@@ -87,7 +125,6 @@ function renderAlphabet() {
     const alphabet = 'ABCĆDEFGHIJKLŁMNOPRSŚTUWZŹŻ'.split('');
     dom.alphabetFilter.innerHTML = '';
 
-    // "ALL" button
     const allBtn = document.createElement('button');
     allBtn.textContent = 'WSZYSCY';
     allBtn.className = `alphabet-letter ${state.activeFilter === null ? 'active' : ''}`;
@@ -98,7 +135,6 @@ function renderAlphabet() {
     };
     dom.alphabetFilter.appendChild(allBtn);
 
-    // Letter buttons
     alphabet.forEach(letter => {
         const btn = document.createElement('button');
         btn.textContent = letter;
@@ -115,7 +151,6 @@ function renderAlphabet() {
 function renderGrid() {
     dom.grid.innerHTML = '';
 
-    // Filter employees
     let filteredEmployees = state.employees;
     if (state.activeFilter !== null) {
         filteredEmployees = state.employees.filter(emp => {
@@ -126,7 +161,23 @@ function renderGrid() {
 
     filteredEmployees.forEach(emp => {
         const tile = document.createElement('div');
-        tile.className = `employee-tile ${emp.status === 'STARTED' ? 'started' : ''}`;
+
+        let tileClass = 'employee-tile';
+        let statusClass = 'employee-status';
+        let statusText = 'WOLNE';
+
+        if (emp.status === 'STARTED') {
+            tileClass += ' started';
+            statusClass += ' active';
+            statusText = `W PRACY od ${emp.startTime}`;
+        } else if (emp.endTime) {
+            tileClass += ' finished';
+            statusClass += ' finished';
+            const workHours = calculateWorkHours(emp.startTime, emp.endTime);
+            statusText = `${emp.startTime} - ${emp.endTime} (${workHours})`;
+        }
+
+        tile.className = tileClass;
         tile.onclick = () => openModal(emp);
 
         const initials = emp.name.split(' ').map(n => n[0]).join('');
@@ -134,8 +185,8 @@ function renderGrid() {
         tile.innerHTML = `
             <div class="employee-initials">${initials}</div>
             <div class="employee-name">${emp.name}</div>
-            <div class="employee-status ${emp.status === 'STARTED' ? 'active' : ''}">
-                ${emp.status === 'STARTED' ? 'W PRACY' : 'WOLNE'}
+            <div class="${statusClass}">
+                ${statusText}
             </div>
         `;
         dom.grid.appendChild(tile);
@@ -159,7 +210,6 @@ function openModal(employee) {
     dom.modalName.textContent = employee.name;
     dom.msg.classList.add('hidden');
 
-    // Smart Buttons Logic
     if (employee.status === 'STARTED') {
         dom.btnStart.classList.add('hidden');
         dom.btnStop.classList.remove('hidden');
@@ -183,7 +233,6 @@ async function handleAction(action) {
     const emp = state.currentEmployee;
     const originalStatus = emp.status;
 
-    // Optimistic UI Update
     showMessage('Zapisywanie...', 'success');
 
     if (USE_MOCK_DATA) {
@@ -202,16 +251,30 @@ async function handleAction(action) {
         const response = await fetch(SCRIPT_URL, {
             method: 'POST',
             body: JSON.stringify({
-                action: action, // 'START' or 'STOP'
+                action: action,
                 name: emp.name,
-                source: emp.source // 'PRACA' or 'ZLECENIE'
+                source: emp.source
             })
         });
 
         const result = await response.json();
         if (result.success) {
-            emp.status = action === 'START' ? 'STARTED' : 'IDLE';
-            showMessage(action === 'START' ? 'Rozpoczęto pracę!' : 'Zakończono pracę!', 'success');
+            // Update local state with current time
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+
+            if (action === 'START') {
+                emp.status = 'STARTED';
+                emp.startTime = timeStr;
+                emp.endTime = null;
+                showMessage('Rozpoczęto pracę!', 'success');
+            } else {
+                emp.status = 'IDLE';
+                emp.endTime = timeStr;
+                // startTime remains unchanged
+                showMessage('Zakończono pracę!', 'success');
+            }
+
             setTimeout(() => {
                 closeModal();
                 renderGrid();
@@ -222,7 +285,7 @@ async function handleAction(action) {
     } catch (error) {
         console.error(error);
         showMessage('Błąd zapisu! Spróbuj ponownie.', 'error');
-        emp.status = originalStatus; // Revert
+        emp.status = originalStatus;
     }
 }
 
