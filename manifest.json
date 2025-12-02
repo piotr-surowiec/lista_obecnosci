@@ -1,6 +1,6 @@
 {
-  "name": "Rejestrator Czasu Pracy",
-  "short_name": "RCP",
+  "name": "Lista Obecności",
+  "short_name": "Lista Obecności",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f3f4f6",
