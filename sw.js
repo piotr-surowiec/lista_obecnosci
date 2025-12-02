@@ -1,26 +1,17 @@
-const CACHE_NAME = 'rcp-v1';
-const ASSETS = [
-    './',
-    './index.html',
-    './style.css',
-    './app.js',
-    './manifest.json'
-];
+// Minimal Service Worker for PWA support
+// Strategy: Network Only (No Caching)
 
 self.addEventListener('install', (e) => {
-    e.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-    );
+    // Force new service worker to activate immediately
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', (e) => {
+    // Claim clients immediately
+    e.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('fetch', (e) => {
-    // Bypass cache for Google Apps Script calls
-    if (e.request.url.includes('script.google.com')) {
-        e.respondWith(fetch(e.request));
-        return;
-    }
-
-    e.respondWith(
-        caches.match(e.request).then((response) => response || fetch(e.request))
-    );
+    // Always go to network, never cache
+    e.respondWith(fetch(e.request));
 });

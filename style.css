@@ -14,7 +14,6 @@
     margin: 0;
     padding: 0;
     user-select: none;
-    /* Prevent text selection on touch */
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -26,13 +25,13 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    /* Prevent body scroll */
 }
 
 /* Header */
 .app-header {
     background-color: var(--card-bg);
-    padding: 1rem 2rem;
+    padding: 0.75rem 1.5rem;
+    /* Mniejszy padding */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -41,22 +40,34 @@ body {
 }
 
 .header-left h1 {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
+    /* Mniejszy nagłówek */
     color: var(--primary-color);
+    margin: 0;
+    display: flex;
+    align-items: center;
 }
 
-.status-indicator {
-    font-size: 0.8rem;
-    margin-top: 0.2rem;
-    font-weight: bold;
+.status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-left: 0.5rem;
 }
 
-.status-indicator.online {
-    color: var(--success-color);
+.status-dot.online {
+    background-color: var(--success-color);
+    box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
 }
 
-.status-indicator.offline {
-    color: var(--danger-color);
+.status-dot.offline {
+    background-color: var(--danger-color);
+}
+
+.header-center {
+    flex: 1;
+    text-align: center;
 }
 
 .header-right {
@@ -64,13 +75,15 @@ body {
 }
 
 .clock {
-    font-size: 2rem;
+    font-size: 1.5rem;
+    /* Mniejszy zegar */
     font-weight: bold;
     font-variant-numeric: tabular-nums;
 }
 
 .date {
-    font-size: 1rem;
+    font-size: 0.9rem;
+    /* Mniejsza data */
     color: var(--text-muted);
 }
 
@@ -90,7 +103,6 @@ body {
 
 .view.active {
     display: flex;
-    /* Or grid/block depending on view */
 }
 
 /* Loading */
@@ -123,7 +135,6 @@ body {
 /* Employee Grid */
 #employee-grid-view {
     display: none;
-    /* Hidden by default */
 }
 
 #employee-grid-view.active {
@@ -143,14 +154,17 @@ body {
 }
 
 .alphabet-letter {
-    min-width: 36px;
-    height: 36px;
+    min-width: 48px;
+    /* Większe przyciski */
+    height: 48px;
+    /* Większe przyciski */
     padding: 0.25rem 0.5rem;
     border: 2px solid #e5e7eb;
     border-radius: 0.5rem;
     background-color: white;
     color: var(--text-main);
-    font-size: 0.9rem;
+    font-size: 1.2rem;
+    /* Większa czcionka */
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s;
@@ -181,7 +195,7 @@ body {
 .employee-tile {
     background-color: var(--card-bg);
     border-radius: 1rem;
-    padding: 2rem 1rem;
+    padding: 1rem;
     text-align: center;
     box-shadow: var(--shadow);
     cursor: pointer;

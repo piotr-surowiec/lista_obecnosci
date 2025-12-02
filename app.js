@@ -43,6 +43,23 @@ function updateClock() {
     dom.date.textContent = now.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
+// Connection Status
+function updateConnectionStatus() {
+    const statusDot = document.getElementById('connection-status');
+    if (navigator.onLine) {
+        statusDot.classList.remove('offline');
+        statusDot.classList.add('online');
+    } else {
+        statusDot.classList.remove('online');
+        statusDot.classList.add('offline');
+    }
+}
+
+window.addEventListener('online', updateConnectionStatus);
+window.addEventListener('offline', updateConnectionStatus);
+// Initial check
+updateConnectionStatus();
+
 // Helper: Calculate Work Hours
 function calculateWorkHours(startTime, endTime) {
     if (!startTime || !endTime) return '';

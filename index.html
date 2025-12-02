@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2563eb">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2922/2922510.png">
 </head>
@@ -18,11 +18,12 @@
     <!-- Header -->
     <header class="app-header">
         <div class="header-left">
-            <h1>Rejestrator Czasu</h1>
-            <div id="connection-status" class="status-indicator online">Online</div>
+            <h1>Rejestrator Czasu <span id="connection-status" class="status-dot online"></span></h1>
+        </div>
+        <div class="header-center">
+            <div id="clock" class="clock">00:00</div>
         </div>
         <div class="header-right">
-            <div id="clock" class="clock">00:00</div>
             <div id="date" class="date">Poniedziałek, 1 Stycznia</div>
         </div>
     </header>
