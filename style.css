@@ -154,7 +154,7 @@ body {
 }
 
 .alphabet-letter {
-    min-width: 48px;
+    min-width: 80px;
     /* Większe przyciski */
     height: 48px;
     /* Większe przyciski */
